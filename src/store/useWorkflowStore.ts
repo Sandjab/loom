@@ -19,6 +19,7 @@ import type {
 import { createNodeId, createEdgeId, createWorkflowId } from '@/utils/id';
 import { nextAvailableName } from '@/utils/naming';
 import { getNodeType } from '@/nodes/registry';
+import { detectBackEdges } from '@/utils/auto-layout';
 
 // --- Derived state builders ---
 
@@ -31,13 +32,15 @@ function buildRfNodes(nodes: WorkflowNode[]): Node<WorkflowNodeData>[] {
   }));
 }
 
-function buildRfEdges(edges: WorkflowEdge[]): Edge[] {
+function buildRfEdges(edges: WorkflowEdge[], nodes?: WorkflowNode[]): Edge[] {
+  const backEdgeIds = nodes ? detectBackEdges(nodes, edges) : new Set<string>();
   return edges.map((edge) => ({
     id: edge.id,
     source: edge.source,
     target: edge.target,
     sourceHandle: edge.sourceHandle,
     type: 'flow',
+    data: { isBackEdge: backEdgeIds.has(edge.id) },
   }));
 }
 
@@ -184,7 +187,7 @@ export const useWorkflowStore = create<WorkflowState>()(
           return {
             workflow: { ...state.workflow, nodes: updatedNodes, edges: updatedEdges },
             rfNodes: state.rfNodes.filter((n) => !idSet.has(n.id)),
-            rfEdges: buildRfEdges(updatedEdges),
+            rfEdges: buildRfEdges(updatedEdges, updatedNodes),
             selectedNodeId: state.selectedNodeId && idSet.has(state.selectedNodeId) ? null : state.selectedNodeId,
           };
         });
@@ -267,22 +270,24 @@ export const useWorkflowStore = create<WorkflowState>()(
       addEdge: (source, target, sourceHandle) => {
         const id = createEdgeId();
         const edge: WorkflowEdge = { id, source, target, sourceHandle };
-        const rfEdge: Edge = { id, source, target, sourceHandle, type: 'flow' };
-        set((state) => ({
-          workflow: { ...state.workflow, edges: [...state.workflow.edges, edge] },
-          rfEdges: [...state.rfEdges, rfEdge],
-        }));
+        set((state) => {
+          const newEdges = [...state.workflow.edges, edge];
+          return {
+            workflow: { ...state.workflow, edges: newEdges },
+            rfEdges: buildRfEdges(newEdges, state.workflow.nodes),
+          };
+        });
       },
 
       removeEdges: (ids) => {
         const idSet = new Set(ids);
-        set((state) => ({
-          workflow: {
-            ...state.workflow,
-            edges: state.workflow.edges.filter((e) => !idSet.has(e.id)),
-          },
-          rfEdges: state.rfEdges.filter((e) => !idSet.has(e.id)),
-        }));
+        set((state) => {
+          const newEdges = state.workflow.edges.filter((e) => !idSet.has(e.id));
+          return {
+            workflow: { ...state.workflow, edges: newEdges },
+            rfEdges: buildRfEdges(newEdges, state.workflow.nodes),
+          };
+        });
       },
 
       updateTablePositions: (positions) => {
@@ -302,7 +307,7 @@ export const useWorkflowStore = create<WorkflowState>()(
         set({
           workflow,
           rfNodes: buildRfNodes(workflow.nodes),
-          rfEdges: buildRfEdges(workflow.edges),
+          rfEdges: buildRfEdges(workflow.edges, workflow.nodes),
           selectedNodeId: null,
         });
         useWorkflowStore.temporal.getState().clear();
@@ -328,7 +333,7 @@ export const useWorkflowStore = create<WorkflowState>()(
       rebuildRfState: () => {
         set((state) => ({
           rfNodes: buildRfNodes(state.workflow.nodes),
-          rfEdges: buildRfEdges(state.workflow.edges),
+          rfEdges: buildRfEdges(state.workflow.edges, state.workflow.nodes),
         }));
       },
     }),

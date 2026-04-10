@@ -84,13 +84,12 @@ function WorkflowNodeInner({ id, data, selected }: NodeProps) {
 
       {/* Output handles */}
       {outputHandles.map((h, i) => {
-        const isConditionTrue = node.type === 'condition' && h.id === 'true';
-        const isConditionFalse = node.type === 'condition' && h.id === 'false';
-        const handleColor = isConditionTrue
-          ? '#22c55e'
-          : isConditionFalse
-            ? '#ef4444'
-            : '#94a3b8';
+        const handleColor =
+          node.type === 'condition' && h.id === 'true' ? '#22c55e' :
+          node.type === 'condition' && h.id === 'false' ? '#ef4444' :
+          node.type === 'loop' && h.id === 'body' ? '#14b8a6' :
+          node.type === 'loop' && h.id === 'done' ? '#22c55e' :
+          '#94a3b8';
 
         return (
           <div key={h.id}>

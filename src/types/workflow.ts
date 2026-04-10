@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import type { Node } from '@xyflow/react';
 
-export type NodeType = 'llm-call' | 'claude-cli' | 'condition' | 'input' | 'output';
+export type NodeType = 'llm-call' | 'claude-cli' | 'condition' | 'input' | 'output' | 'loop';
 
 export interface LlmCallConfig {
   type: 'llm-call';
@@ -47,7 +47,14 @@ export interface OutputConfig {
   template: string;
 }
 
-export type NodeConfig = LlmCallConfig | ClaudeCliConfig | ConditionConfig | InputConfig | OutputConfig;
+export interface LoopConfig {
+  type: 'loop';
+  iterableExpression: string;
+  itemVariable: string;
+  maxIterations: number;
+}
+
+export type NodeConfig = LlmCallConfig | ClaudeCliConfig | ConditionConfig | InputConfig | OutputConfig | LoopConfig;
 
 export interface WorkflowNode {
   id: string;

@@ -10,6 +10,7 @@ import '@/nodes/output';
 import '@/nodes/llm-call';
 import '@/nodes/claude-cli';
 import '@/nodes/condition';
+import '@/nodes/loop';
 
 import App from './App';
 import './index.css';

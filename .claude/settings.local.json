@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs -0 ls -lh)",
+      "Bash(git config:*)",
+      "Bash(bash:*)",
+      "Bash(npm install:*)",
+      "Bash(npx vite:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(xargs grep:*)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")"
+    ]
+  }
+}

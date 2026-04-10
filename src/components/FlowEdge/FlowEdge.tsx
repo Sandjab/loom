@@ -12,7 +12,10 @@ function FlowEdgeInner({
   targetPosition,
   selected,
   markerEnd,
+  data,
 }: EdgeProps) {
+  const isBackEdge = (data as { isBackEdge?: boolean } | undefined)?.isBackEdge;
+
   const [edgePath] = getSmoothStepPath({
     sourceX,
     sourceY,
@@ -38,8 +41,9 @@ function FlowEdgeInner({
         id={id}
         d={edgePath}
         fill="none"
-        stroke={selected ? 'var(--edge-color-selected, #6366f1)' : 'var(--edge-color, #94a3b8)'}
+        stroke={selected ? 'var(--edge-color-selected, #6366f1)' : isBackEdge ? '#14b8a6' : 'var(--edge-color, #94a3b8)'}
         strokeWidth={selected ? 2 : 1.5}
+        strokeDasharray={isBackEdge ? '6 3' : undefined}
         markerEnd={markerEnd}
         className="react-flow__edge-path"
       />

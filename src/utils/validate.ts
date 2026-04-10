@@ -67,17 +67,26 @@ export function validateWorkflow(
     }
   }
 
-  // Cycle detection (DFS)
+  // Cycle detection (DFS) — allow cycles that pass through Loop nodes
   const visited = new Set<string>();
   const inStack = new Set<string>();
+  const path: string[] = [];
   function hasCycle(nodeId: string): boolean {
-    if (inStack.has(nodeId)) return true;
+    if (inStack.has(nodeId)) {
+      // Back-edge found — allow if any node in the cycle is a Loop node
+      const cycleStart = path.indexOf(nodeId);
+      const cycleNodes = path.slice(cycleStart);
+      const hasLoop = cycleNodes.some((id) => nodes.find((n) => n.id === id)?.type === 'loop');
+      return !hasLoop;
+    }
     if (visited.has(nodeId)) return false;
     visited.add(nodeId);
     inStack.add(nodeId);
+    path.push(nodeId);
     for (const edge of outgoingEdges.get(nodeId) ?? []) {
       if (hasCycle(edge.target)) return true;
     }
+    path.pop();
     inStack.delete(nodeId);
     return false;
   }
