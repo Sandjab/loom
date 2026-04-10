@@ -38,15 +38,19 @@ export function Toolbar() {
 
   const { undo, redo, canUndo, canRedo } = useUndoRedo();
   const { theme, toggleTheme } = useTheme();
-  const { fitView } = useReactFlow();
+  const { fitView, screenToFlowPosition } = useReactFlow();
 
   const allNodeTypes = useMemo(() => getAllNodeTypes(), []);
 
   const handleAddNode = useCallback(
     (type: Parameters<typeof addNode>[0]) => {
-      addNode(type, { x: 100, y: 100 });
+      const center = screenToFlowPosition({
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+      });
+      addNode(type, center);
     },
-    [addNode],
+    [addNode, screenToFlowPosition],
   );
 
   const handleAutoLayout = useCallback(() => {
@@ -110,7 +114,7 @@ export function Toolbar() {
           {allNodeTypes.map((def) => {
             const Icon = def.icon;
             return (
-              <DropdownMenuItem key={def.type} onSelect={() => handleAddNode(def.type)}>
+              <DropdownMenuItem key={def.type} onClick={() => handleAddNode(def.type)}>
                 <Icon className="size-4" style={{ color: def.color }} />
                 {def.label}
               </DropdownMenuItem>
