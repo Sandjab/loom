@@ -6,7 +6,7 @@ import { validateWorkflow } from '@/utils/validate';
 import { AlertTriangle, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import type { ValidationError } from '@/types/workflow';
 
-const zoomSelector = (s: ReactFlowState) => Math.round((s.panZoom?.getViewport().zoom ?? 1) * 100);
+const zoomSelector = (s: ReactFlowState) => Math.round(s.transform[2] * 100);
 
 export function StatusBar() {
   const workflow = useWorkflowStore((s) => s.workflow);
