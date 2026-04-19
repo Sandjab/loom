@@ -80,7 +80,7 @@ export interface Workflow {
   edges: WorkflowEdge[];
 }
 
-export interface WorkflowNodeData {
+export interface WorkflowNodeData extends Record<string, unknown> {
   node: WorkflowNode;
 }
 
